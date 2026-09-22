@@ -1,12 +1,12 @@
 from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
 
-from inspection.models import Inspection
+from inspection.models import DeclineSetting, Inspection
 from inspection.rules import judge
 
 
 class Command(BaseCommand):
-    help = "seed two inspections and two accounts"
+    help = "seed two inspections, two accounts and the decline threshold"
 
     def handle(self, *args, **options):
         group, _ = Group.objects.get_or_create(name="inspector")
@@ -20,6 +20,8 @@ class Command(BaseCommand):
             watch.set_password("watch123456")
             watch.save()
         watch.groups.remove(group)
+        if not DeclineSetting.objects.exists():
+            DeclineSetting.objects.create(drop_cd=50.0, updated_by="system")
         if Inspection.objects.exists():
             self.stdout.write("already seeded")
             return

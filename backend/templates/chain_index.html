@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}走低链{% endblock %}
+{% block body %}
+<h1>走低链</h1>
+<p>同一灯号按时间排成的光强链，逐笔文字列出，走低行标出少了多少坎德拉。</p>
+<table>
+  <thead><tr><th>灯号</th><th>笔数</th><th>最新实测（坎德拉）</th><th>走低次数</th><th></th></tr></thead>
+  <tbody>
+  {% for chain in chains %}
+    <tr>
+      <td>{{ chain.aid_code }}</td>
+      <td>{{ chain.count }}</td>
+      <td>{{ chain.latest_cd }}</td>
+      <td>{% if chain.declines %}<span class="bad">{{ chain.declines }}</span>{% else %}0{% endif %}</td>
+      <td><a href="{% url 'chain' chain.aid_code %}">看链</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5">还没有记录</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

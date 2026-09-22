@@ -9,4 +9,8 @@ urlpatterns = [
     path("", views.list_view, name="list"),
     path("inspections/new/", views.create_view, name="create"),
     path("inspections/<int:pk>/", views.detail_view, name="detail"),
+    path("chains/", views.chain_index_view, name="chains"),
+    path("chains/<str:aid_code>/", views.chain_view, name="chain"),
+    path("events/", views.events_view, name="events"),
+    path("settings/decline/", views.threshold_view, name="threshold"),
 ]

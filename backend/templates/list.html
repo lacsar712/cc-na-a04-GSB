@@ -10,7 +10,7 @@
       <td>{{ row.measured_cd }}</td>
       <td class="{% if row.verdict == '合格' %}ok{% else %}bad{% endif %}">{{ row.verdict }}</td>
       <td>{{ row.note }}</td>
-      <td><a href="{% url 'detail' row.pk %}">详情</a></td>
+      <td><a href="{% url 'detail' row.pk %}">详情</a> · <a href="{% url 'chain' row.aid_code %}">走低链</a></td>
     </tr>
   {% empty %}
     <tr><td colspan="5">还没有记录</td></tr>

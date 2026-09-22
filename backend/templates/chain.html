@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}走低链 · {{ aid_code }}{% endblock %}
+{% block body %}
+<h1>走低链 · {{ aid_code }}</h1>
+<p>按登记时间从早到晚逐笔列出实测坎德拉。</p>
+<table>
+  <thead><tr><th>笔号</th><th>时间</th><th>实测（坎德拉）</th><th>走低</th><th></th></tr></thead>
+  <tbody>
+  {% for item in rows %}
+    <tr>
+      <td>#{{ item.row.pk }}</td>
+      <td>{{ item.row.created_at|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ item.row.measured_cd }}</td>
+      <td>
+        {% if item.event %}
+          <span class="bad">走低 · 比上一笔少 {{ item.event.drop_cd }} 坎德拉</span>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td><a href="{% url 'detail' item.row.pk %}">详情</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5">这个灯号还没有记录</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'chains' %}">返回走低链</a></p>
+{% endblock %}

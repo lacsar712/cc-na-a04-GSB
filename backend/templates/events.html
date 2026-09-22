@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}事件册{% endblock %}
+{% block body %}
+<h1>事件册</h1>
+<p>
+  当前走低门槛：比上一笔低出 {{ threshold.drop_cd }} 坎德拉即算走低
+  （{{ threshold.updated_by }} 于 {{ threshold.updated_at|date:"Y-m-d H:i" }} 设定）。
+  每条事件记下当时门槛与差额，之后改门槛不影响这里的原文。
+</p>
+<table>
+  <thead>
+    <tr><th>时间</th><th>灯号</th><th>上一笔</th><th>本笔</th><th>当时门槛（坎德拉）</th><th>差额（坎德拉）</th></tr>
+  </thead>
+  <tbody>
+  {% for event in events %}
+    <tr>
+      <td>{{ event.created_at|date:"Y-m-d H:i:s" }}</td>
+      <td><a href="{% url 'chain' event.aid_code %}">{{ event.aid_code }}</a></td>
+      <td><a href="{% url 'detail' event.prev_reading_id %}">#{{ event.prev_reading_id }}</a>（{{ event.prev_reading.measured_cd }}）</td>
+      <td><a href="{% url 'detail' event.curr_reading_id %}">#{{ event.curr_reading_id }}</a>（{{ event.curr_reading.measured_cd }}）</td>
+      <td>{{ event.threshold_cd }}</td>
+      <td class="bad">少 {{ event.drop_cd }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6">还没有走低事件</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
