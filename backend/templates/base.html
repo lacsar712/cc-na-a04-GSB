@@ -23,7 +23,12 @@
     <strong>航标灯光巡检台</strong>
     {% if user.is_authenticated %}
       <a href="{% url 'list' %}">巡检记录</a>
-      {% if can_write %}<a href="{% url 'create' %}">登记</a>{% endif %}
+      <a href="{% url 'chains' %}">走低链</a>
+      <a href="{% url 'events' %}">事件册</a>
+      {% if can_write %}
+        <a href="{% url 'create' %}">登记</a>
+        <a href="{% url 'threshold' %}">走低门槛</a>
+      {% endif %}
       <span style="margin-left:auto">{{ user.username }}</span>
       <a href="{% url 'logout' %}">退出</a>
     {% endif %}

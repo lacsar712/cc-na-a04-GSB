@@ -13,3 +13,36 @@ class Inspection(models.Model):
 
     class Meta:
         ordering = ["-id"]
+
+
+class DeclineThreshold(models.Model):
+    """走低门槛：比上一笔低出多少坎德拉算走低。全站一条，改后只影响新判定。"""
+
+    threshold_cd = models.FloatField("走低门槛（坎德拉）")
+    updated_by = models.CharField("修改人", max_length=64)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-id"]
+
+    @classmethod
+    def current(cls) -> float:
+        row = cls.objects.order_by("-id").first()
+        return row.threshold_cd if row else 100.0
+
+
+class DeclineEvent(models.Model):
+    """走低事件：判定那一刻的门槛与差额原样落库，以后改门槛不回写。"""
+
+    prev = models.ForeignKey(
+        Inspection, verbose_name="上一笔", related_name="+", on_delete=models.CASCADE
+    )
+    curr = models.ForeignKey(
+        Inspection, verbose_name="本笔", related_name="+", on_delete=models.CASCADE
+    )
+    threshold_cd = models.FloatField("当时门槛（坎德拉）")
+    drop_cd = models.FloatField("差额（坎德拉）")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-id"]

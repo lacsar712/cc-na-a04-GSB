@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>走低事件册</h1>
+<table>
+  <thead><tr><th>事件</th><th>灯号</th><th>上一笔</th><th>本笔</th><th>差额（坎德拉）</th><th>当时门槛</th><th>时间</th></tr></thead>
+  <tbody>
+  {% for e in events %}
+    <tr>
+      <td>#{{ e.pk }}</td>
+      <td>{{ e.curr.aid_code }}</td>
+      <td>#{{ e.prev_id }}（{{ e.prev.measured_cd }}）</td>
+      <td>#{{ e.curr_id }}（{{ e.curr.measured_cd }}）</td>
+      <td class="bad">{{ e.drop_cd }}</td>
+      <td>{{ e.threshold_cd }}</td>
+      <td>{{ e.created_at|date:"Y-m-d H:i" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="7">还没有走低事件</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}走低链 · {{ aid_code }}{% endblock %}
+{% block body %}
+<h1>走低链 · {{ aid_code }}</h1>
+{% for line in lines %}
+  <p>
+    #{{ line.row.pk }} · {{ line.row.created_at|date:"Y-m-d H:i" }} · 实测 {{ line.row.measured_cd }} 坎德拉
+    {% if line.event %}
+      · <span class="bad">走低：比上一笔少 {{ line.event.drop_cd }} 坎德拉（当时门槛 {{ line.event.threshold_cd }}）</span>
+    {% endif %}
+  </p>
+{% empty %}
+  <p>这个灯号还没有记录</p>
+{% endfor %}
+<p><a href="{% url 'chains' %}">返回走低链</a></p>
+{% endblock %}

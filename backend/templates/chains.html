@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>走低链</h1>
+{% if codes %}
+  <ul>
+  {% for code in codes %}
+    <li><a href="{% url 'chain' code %}">{{ code }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>还没有记录</p>
+{% endif %}
+{% endblock %}

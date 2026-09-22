@@ -3,8 +3,8 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from inspection.models import Inspection
-from inspection.rules import judge
+from inspection.models import DeclineEvent, DeclineThreshold, Inspection
+from inspection.rules import decline_drop, judge
 
 
 def _can_write(user) -> bool:
@@ -73,6 +73,11 @@ def create_view(request):
             error = "请填编号和三项数值"
         else:
             verdict, note = judge(measured, required, bearing)
+            prev = (
+                Inspection.objects.filter(aid_code=code)
+                .order_by("-id")
+                .first()
+            )
             row = Inspection.objects.create(
                 aid_code=code,
                 measured_cd=measured,
@@ -82,5 +87,65 @@ def create_view(request):
                 note=note,
                 created_by=request.user.username,
             )
-            return redirect("detail", pk=row.pk)
+            if prev is not None:
+                threshold = DeclineThreshold.current()
+                drop = decline_drop(prev.measured_cd, measured, threshold)
+                if drop is not None:
+                    DeclineEvent.objects.create(
+                        prev=prev, curr=row, threshold_cd=threshold, drop_cd=drop
+                    )
+            return redirect("chain", aid_code=row.aid_code)
     return render(request, "form.html", {"error": error})
+
+
+@login_required
+def chain_index_view(request):
+    codes = (
+        Inspection.objects.order_by("aid_code")
+        .values_list("aid_code", flat=True)
+        .distinct()
+    )
+    return render(request, "chains.html", {"codes": codes})
+
+
+@login_required
+def chain_view(request, aid_code):
+    rows = list(Inspection.objects.filter(aid_code=aid_code).order_by("id"))
+    events = {e.curr_id: e for e in DeclineEvent.objects.filter(curr__in=rows)}
+    lines = [{"row": row, "event": events.get(row.pk)} for row in rows]
+    return render(
+        request, "chain.html", {"aid_code": aid_code, "lines": lines}
+    )
+
+
+@login_required
+def events_view(request):
+    events = DeclineEvent.objects.select_related("prev", "curr").all()
+    return render(request, "events.html", {"events": events})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def threshold_view(request):
+    if not _can_write(request.user):
+        return HttpResponseForbidden("仅持灯账号可改走低门槛")
+    error = ""
+    if request.method == "POST":
+        try:
+            threshold = float(request.POST["threshold_cd"])
+            if threshold <= 0:
+                raise ValueError("not positive")
+        except (KeyError, ValueError):
+            error = "请填大于 0 的坎德拉数"
+        else:
+            DeclineThreshold.objects.create(
+                threshold_cd=threshold, updated_by=request.user.username
+            )
+            return redirect("threshold")
+    current = DeclineThreshold.current()
+    history = DeclineThreshold.objects.all()[:10]
+    return render(
+        request,
+        "threshold.html",
+        {"error": error, "current": current, "history": history},
+    )
